@@ -1,0 +1,271 @@
+from tkinter import *    # tkinter librarisindeki bütün methodları getirir
+from PIL import Image, ImageTk
+import smtplib
+from email.message import EmailMessage
+import os
+window = Tk()
+window.title("Algan's Coffee")
+window.geometry("400x500")
+image = Image.open("logo.png")
+image = image.resize((400,450))
+logo = ImageTk.PhotoImage(image)
+logoLabel = Label(window, image = logo)
+logoLabel.grid(row = 0, column=0, columnspan = 2)
+
+
+
+def signin():
+    inwindow = Toplevel()
+    inwindow.title("Sign in Page")
+    inwindow.geometry("500x250")
+    frame = Frame(inwindow, width=400, height=400)
+    frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    userl = Label(frame, text="Username")
+    userl.grid(row=0, column=0)
+    passwordl = Label(frame, text="Password")
+    passwordl.grid(row=1, column=0)
+
+    usere = Entry(frame, width=30, bd=5)
+    usere.grid(row=0, column=1)
+    passworde = Entry(frame, width=30, bd=5, show="*")
+    passworde.grid(row=1, column=1)
+
+    def signininside():
+        ordersum=""
+        sidesum=""
+        userok = False
+        passok = False
+        file = open("users.txt", "r")
+        user = usere.get()
+        password = passworde.get()
+        for line in file:
+            line = line.strip()
+            line = line.split(",")
+            if user == (line[0]):
+                userok = True
+                if password == (line[1]):
+                    passok = True
+                    orderwindow = Toplevel()
+                    orderwindow.title("Order Page")
+                    orderwindow.geometry("500x600")
+                    coffframe = LabelFrame(orderwindow, text="Select Your Coffee", padx=20, pady=20)
+                    coffframe.grid(row=0, column=0, padx=20, pady=20)
+
+                    coff = StringVar()
+                    coff.set("americano")
+                    Radiobutton(coffframe, text="Americano-3.2$", variable=coff, value="americano").grid(row=0, column=0,
+                                                                                                    sticky="w")
+                    Radiobutton(coffframe, text="Latte-3.2$", variable=coff, value="latte").grid(row=1, column=0, sticky="w")
+                    Radiobutton(coffframe, text="Mocha-4$", variable=coff, value="mocha").grid(row=2, column=0, sticky="w")
+                    Radiobutton(coffframe, text="Matcha-5$", variable=coff, value="matcha").grid(row=3, column=0, sticky="w")
+
+                    milkframe = LabelFrame(orderwindow, text="Select Your Milk", padx=20, pady=20)
+                    milkframe.grid(row=0, column=1, padx=20, pady=20)
+
+                    milk = StringVar()
+                    milk.set("Whole Milk-0$")
+                    Radiobutton(milkframe, text="Whole Milk-0$", variable=milk, value="Whole").grid(row=0,
+                                                                                                    column=0,
+                                                                                                    sticky="w")
+                    Radiobutton(milkframe, text="Almond Milk-1$", variable=milk, value="Almond").grid(row=1, column=0,
+                                                                                                      sticky="w")
+                    Radiobutton(milkframe, text="Oat Milk-2$", variable=milk, value="Oat").grid(row=2, column=0,
+                                                                                                sticky="w")
+
+
+                    sideframe = LabelFrame(orderwindow, text="Select Your Sides", padx=20, pady=20)
+                    sideframe.grid(row=1, column=0, padx=20, pady=20)
+
+                    cookieVar = IntVar()
+                    cakeVar = IntVar()
+                    cholateVar = IntVar()
+                    cookbutton = Checkbutton(sideframe, text="Cookie-5$", variable=cakeVar, onvalue=1, offvalue=0 )
+                    cookbutton.deselect()
+                    cakebutton = Checkbutton(sideframe, text="Cake-5$", variable=cookieVar, onvalue=1, offvalue=0)
+                    cakebutton.deselect()
+                    cholatebutton = Checkbutton(sideframe, text="Chocalate-6$", variable=cholateVar, onvalue=1, offvalue=0)
+                    cholatebutton.deselect()
+
+                    cookbutton.grid(row=0, column=0, sticky="w")
+                    cakebutton.grid(row=1, column=0, sticky="w")
+                    cholatebutton.grid(row=2, column=0, sticky="w")
+
+                    disframe = LabelFrame(orderwindow, text="Do you have student discount?", padx=20, pady=20)
+                    disframe.grid(row=1, column=1, padx=20, pady=20)
+
+                    options = ["Yes", "No"]
+                    dis = StringVar()
+                    dis.set(options[1])
+                    dismenu = OptionMenu(disframe, dis, *options)
+                    dismenu.grid(row=0, column=0, sticky="w")
+
+                    tablel = Label(orderwindow, text="Table number: ")
+                    tablel.grid(row=7, column=0)
+
+                    tablenumbere = Entry(orderwindow, bd="3")
+                    tablenumbere.grid(row=7, column=1)
+
+
+                    def calculate():
+                        nonlocal ordersum, sidesum
+                        total = 0
+                        coffprice = 0
+                        sideprice = 0
+                        discount = 0
+
+                        ordersum=""
+                        sidesum=""
+
+                        if coff.get() == "americano":
+                            coffprice = 3.2
+                            ordersum +="Americano"
+                        elif coff.get() == "latte":
+                            coffprice = 3.2
+                            ordersum +="Latte"
+                        elif coff.get() == "mocha":
+                            coffprice = 4
+                            ordersum +="Mocha"
+                        elif coff.get() == "matcha":
+                            coffprice = 5
+                            ordersum +="Matcha"
+
+                        if milk.get() == "Almond":
+                            coffprice +=1
+                            ordersum +=" with Almond Milk"
+                        elif milk.get() == "Oat":
+                            coffprice +=2
+                            ordersum += " with Oat Milk"
+
+                        sidesum=""
+                        if cookieVar.get() ==1:
+                            sideprice +=5
+                            sidesum +=", cookie"
+                        if cakeVar.get() ==1:
+                            sideprice +=5
+                            sidesum +=", cake"
+                        if cholateVar.get() ==1:
+                            sideprice +=6
+                            sidesum +=", cholate"
+
+                        total=sideprice+coffprice
+
+                        if dis.get() == "Yes":
+                            total = total*0.9
+                            disok="%10"
+                        else:
+                            disok="%0"
+
+                        coffsell = Label(orderwindow, text="Coffe: ")
+                        coffsell.grid(row=3, column=0)
+
+                        coffsell2 = Label(orderwindow, text=ordersum)
+                        coffsell2.grid(row=3, column=1)
+
+                        sidesell = Label(orderwindow, text="Sides: ")
+                        sidesell.grid(row=4, column=0)
+
+                        sidesell2 = Label(orderwindow, text=sidesum)
+                        sidesell2.grid(row=4, column=1)
+
+                        summary = Label(orderwindow, text="Total: ")
+                        summary.grid(row=5, column=0)
+                        price= str(total)
+                        summary = Label(orderwindow, text=price)
+                        summary.grid(row=5, column=1)
+
+                        disfinal = Label(orderwindow, text="Discount: ")
+                        disfinal.grid(row=6, column=0)
+
+                        disfinal2 = Label(orderwindow, text=disok)
+                        disfinal2.grid(row=6, column=1)
+
+
+
+                    calcb = Button(orderwindow, text="Show my order", command=calculate)
+                    calcb.grid(row=2, column=0)
+
+
+
+                    def sendorder():
+                        message = EmailMessage()
+                        message["From"] = "xxx@gmail.com"
+                        message["To"] = "xxx@gmail.com"
+                        message["Subject"] = "My order"
+
+                        emailtext = (
+                                "Table number: " + tablenumbere.get() + "\n"
+                                + "Coffee: " + ordersum + "\n"
+                                + "Sides: " + sidesum
+                        )
+
+                        message.set_content(emailtext)
+
+                        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as server:
+                            server.login(
+                                "xxx@gmail.com",
+                                "xxxx xxxx xxxx xxxx"
+                            )
+                            server.send_message(message)
+
+                        sentl = Label(orderwindow, text="Email has been sent")
+                        sentl.grid(row=9, column=0)
+
+                    sendb = Button(orderwindow, text="Send my order", command=sendorder)
+                    sendb.grid(row=8, column=0, columnspan=2)
+
+                    break
+        if userok == False:
+            sonucl = Label(frame, text="")
+            sonucl = Label(frame, text="Wrong Username")
+            sonucl.grid(row=3, column=1)
+        elif passok == False:
+            sonucl = Label(frame, text="")
+            sonucl = Label(frame, text="Wrong Password")
+            sonucl.grid(row=3, column=1)
+
+    signinb = Button(frame, text="Jump in", command=signininside)
+    signinb.grid(row=2, column=1)
+
+
+def signup():
+    upwindow = Toplevel()
+    upwindow.title("Algan's Coffee")
+    upwindow.geometry("500x250")
+    frame = Frame(upwindow, width=400, height=400)
+    frame.place(relx=0.5, rely=0.5, anchor="center")
+
+    userl = Label(frame, text="Username")
+    userl.grid(row=0, column=0)
+    passwordl = Label(frame, text="Password")
+    passwordl.grid(row=1, column=0)
+    maill = Label(frame, text="E-mail")
+    maill.grid(row=2, column=0)
+
+    usere = Entry(frame, width=30, bd=5)
+    usere.grid(row=0, column=1)
+    passworde = Entry(frame, width=30, bd=5, show="*")
+    passworde.grid(row=1, column=1)
+    maile = Entry(frame, width=30, bd=5)
+    maile.grid(row=2, column=1)
+
+    def signupinside():
+        file = open("users.txt", "a")
+        user = usere.get()
+        password = passworde.get()
+        mail = maile.get()
+        line = user + "," + password + "," + mail + "\n"
+        file.write(line)
+        sonucl = Label(frame, text="Registered Successfully")
+        sonucl.grid(row=4, column=1)
+
+    signupb = Button(frame, text="Save", command=signupinside)
+    signupb.grid(row=3, column=1)
+
+
+signinb=Button(window,text="Sign in",command=signin)
+signinb.grid(row=1,column=0)
+signupb=Button(window,text="Sign up",command=signup)
+signupb.grid(row=1,column=1)
+
+window.mainloop()
