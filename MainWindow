@@ -1,4 +1,4 @@
-from tkinter import *    # tkinter librarisindeki bütün methodları getirir
+from tkinter import *   
 from PIL import Image, ImageTk
 import smtplib
 from email.message import EmailMessage
